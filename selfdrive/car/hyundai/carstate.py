@@ -337,6 +337,10 @@ class CarState(CarStateBase):
       ("CGW4", 5),
       ("WHL_SPD11", 50),
       ("SAS11", 100),
+      ("SCC11", 50),
+      ("SCC12", 50),
+      ("FCA11", 50),
+      
     ]
 
     if not CP.openpilotLongitudinalControl and CP.carFingerprint not in (CAMERA_SCC_CAR | (NON_SCC_CAR - NON_SCC_RADAR_FCA_CAR)):
