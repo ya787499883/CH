@@ -415,9 +415,10 @@ class Controls:
       self.events.add(EventName.gasPressedOverride)
 
     if not self.CP.notCar:
+      self.events.add_from_msg(self.sm['longitudinalPlanSP'].events)
       if not self.d_camera_hardware_missing:
         self.events.add_from_msg(self.sm['driverMonitoringState'].events)
-      self.events.add_from_msg(self.sm['longitudinalPlanSP'].events)
+
 
     # Add car events, ignore if CAN isn't valid
     if CS.canValid:
