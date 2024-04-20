@@ -9,6 +9,10 @@ from openpilot.selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 LongCtrlState = car.CarControl.Actuators.LongControlState
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
+def calculate_safe_speed(radius_of_curvature, friction_coefficient=0.7, gravity=9.81):
+    if radius_of_curvature == 0:
+        return float('inf')  # 直道，速度不受曲率限制
+    return (radius_of_curvature * gravity * friction_coefficient) ** 0.5
 
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw):
   # No blending at low speed due to lack of torque wind-up and inaccurate current curvature
@@ -44,6 +48,32 @@ class CarController:
     main_on = CS.out.cruiseState.available
     steer_alert = hud_control.visualAlert in (VisualAlert.steerRequired, VisualAlert.ldw)
     fcw_alert = hud_control.visualAlert == VisualAlert.fcw
+
+            # 获取当前曲率和车速
+    current_curvature = CS.curvature
+    current_speed = CS.out.vEgo
+
+        # 计算最大安全速度
+    safe_speed = calculate_safe_speed(1/current_curvature if current_curvature != 0 else 0)
+
+        # 如果当前速度高于安全速度，需要减速
+    if current_speed > safe_speed:
+            # 减速到安全速度，实际控制逻辑需要更复杂的实现
+        target_speed = safe_speed
+    else:
+            # 当曲率接近零（道路变直）时，恢复到设定的巡航速度
+        target_speed = V_CRUISE_MAX
+
+        # 这里应该是发送调整速度的CAN消息的代码
+        # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
+
+        # 更新上次的状态
+    self.apply_curvature_last = current_curvature
+    self.main_on_last = main_on
+    self.lkas_enabled_last = CC.lkasEnabled
+    self.steer_alert_last = steer_alert
+
+    return can_sends
 
     ### acc buttons ###
     if CC.cruiseControl.cancel:
