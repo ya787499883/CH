@@ -23,6 +23,7 @@ class CarState(CarStateBase):
     self.prev_lkas_enabled = None
     self.buttonStates = BUTTON_STATES.copy()
     self.buttonStatesPrev = BUTTON_STATES.copy()
+    self.v_limit = 0
 
   def update(self, cp, cp_cam):
     ret = car.CarState.new_message()
@@ -69,7 +70,7 @@ class CarState(CarStateBase):
     ret.cruiseState.nonAdaptive = cp.vl["Cluster_Info1_FD1"]["AccEnbl_B_RqDrv"] == 0
     ret.cruiseState.standstill = cp.vl["EngBrakeData"]["AccStopMde_D_Rq"] == 3
     ret.accFaulted = cp.vl["EngBrakeData"]["CcStat_D_Actl"] in (1, 2)
-    
+
     if self.CP.carFingerprint in CANFD_CAR:
       ret.cruiseState.speedLimit = self.update_traffic_signals(cp_cam)
 
@@ -134,7 +135,7 @@ class CarState(CarStateBase):
       speed_factor = CV.MPH_TO_MS if v_limit_unit == 2 else CV.KPH_TO_MS if v_limit_unit == 1 else 0
 
       return self.v_limit * speed_factor if self.v_limit not in (0, 255) else 0
-      
+
   @staticmethod
   def get_can_parser(CP):
     messages = [
@@ -186,12 +187,12 @@ class CarState(CarStateBase):
       ("ACCDATA_3", 5),
       ("IPMA_Data", 1),
     ]
-    
+
     if CP.carFingerprint in CANFD_CAR:
       messages += [
         ("Traffic_RecognitnData", 1),
       ]
-      
+
     if CP.enableBsm and CP.carFingerprint in CANFD_CAR:
       messages += [
         ("Side_Detect_L_Stat", 5),
