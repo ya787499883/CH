@@ -27,10 +27,8 @@ class CarController:
         self.steer_alert_last = False
         self.last_curvature = 0  # Initialize last curvature
 
-
     def update(self, CC, CS, now_nanos):
         can_sends = []
-
         actuators = CC.actuators
         hud_control = CC.hudControl
 
@@ -47,37 +45,20 @@ class CarController:
         # 曲率变化
         curvature_change = abs(current_curvature - self.last_curvature)
         self.last_curvature = current_curvature  # Update last curvature
-            # 根据曲率变化决定车速
-    if curvature_change > 0.1745:
-        if current_speed > safe_speed:
-            target_speed = safe_speed
+        
+        # 根据曲率变化决定车速
+        if curvature_change > 0.1745:
+            if current_speed > safe_speed:
+                target_speed = safe_speed
+            else:
+                target_speed = max(current_speed - 10, safe_speed)
         else:
-            target_speed = max(current_speed - 10, safe_speed)
-    else:
-        target_speed = V_CRUISE_MAX
+            target_speed = V_CRUISE_MAX  # 假设 V_CRUISE_MAX 已在某处定义
 
+        # 这里添加代码以发送速度调整信号等
+        # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
 
-def adjust_speed(current_speed, safe_speed, V_CRUISE_MAX, current_curvature, main_on, CC, steer_alert):
-    # 如果当前速度高于安全速度，需要减速
-    if current_speed > safe_speed:
-        target_speed = safe_speed
-    else:
-        # 当曲率接近零（道路变直）时，恢复到设定的巡航速度
-        target_speed = V_CRUISE_MAX
-
-    # 发送调整速度的CAN消息
-    # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
-    self.frame += 1
-    can_sends = []  # 确保此变量在使用前已定义
-    can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
-
-    # 更新上次的状态
-    self.apply_curvature_last = current_curvature
-    self.main_on_last = main_on
-    self.lkas_enabled_last = CC.lkasEnabled
-    self.steer_alert_last = steer_alert
-
-    return can_sends
+        return can_sends
 
       
 def apply_ford_curvature_limits(apply_curvature, apply_curvature_last, current_curvature, v_ego_raw):
