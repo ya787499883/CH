@@ -48,22 +48,22 @@ class CarController:
         curvature_change = abs(current_curvature - self.last_curvature)
         self.last_curvature = current_curvature  # Update last curvature
             # 根据曲率变化决定车速
-       if curvature_change > 0.1745:  # Corresponds to 10 degrees change in curvature
-           if current_speed > safe_speed:
+    if curvature_change > 0.1745:
+        if current_speed > safe_speed:
             target_speed = safe_speed
-           else:
-            target_speed = max(current_speed - 10, safe_speed)  # Slow down by 10 km/h
-       else:
+        else:
+            target_speed = max(current_speed - 10, safe_speed)
+        else:
            target_speed = V_CRUISE_MAX
 
 
         # 如果当前速度高于安全速度，需要减速
-        if current_speed > safe_speed:
+    if current_speed > safe_speed:
             # 减速到安全速度，实际控制逻辑需要更复杂的实现
-            target_speed = safe_speed
-        else:
+        target_speed = safe_speed
+    else:
             # 当曲率接近零（道路变直）时，恢复到设定的巡航速度
-            target_speed = V_CRUISE_MAX
+        target_speed = V_CRUISE_MAX
 
         # 这里应该是发送调整速度的CAN消息的代码
         # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
