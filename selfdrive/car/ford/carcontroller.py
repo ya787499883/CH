@@ -53,8 +53,8 @@ class CarController:
             target_speed = safe_speed
         else:
             target_speed = max(current_speed - 10, safe_speed)
-        else:
-           target_speed = V_CRUISE_MAX
+    else:
+        target_speed = V_CRUISE_MAX
 
 
         # 如果当前速度高于安全速度，需要减速
