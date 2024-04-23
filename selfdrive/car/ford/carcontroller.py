@@ -67,8 +67,7 @@ class CarController:
 
         # 这里应该是发送调整速度的CAN消息的代码
         # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
-        ### 现有代码继续处理其它控制逻辑 ###
-
+     
         self.frame += 1
         return actuators, can_sends
 
