@@ -57,19 +57,21 @@ class CarController:
         target_speed = V_CRUISE_MAX
 
 
-        # 如果当前速度高于安全速度，需要减速
+def adjust_speed(current_speed, safe_speed, V_CRUISE_MAX):
+    # 如果当前速度高于安全速度，需要减速
     if current_speed > safe_speed:
-            # 减速到安全速度，实际控制逻辑需要更复杂的实现
+        # 减速到安全速度，实际控制逻辑需要更复杂的实现
         target_speed = safe_speed
     else:
-            # 当曲率接近零（道路变直）时，恢复到设定的巡航速度
+        # 当曲率接近零（道路变直）时，恢复到设定的巡航速度
         target_speed = V_CRUISE_MAX
 
-        # 这里应该是发送调整速度的CAN消息的代码
-        # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
+    # 这里应该是发送调整速度的CAN消息的代码
+    # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
      
-        self.frame += 1
-        return actuators, can_sends
+    self.frame += 1
+    return actuators, can_sends
+
 
         # 更新上次的状态
         self.apply_curvature_last = current_curvature
