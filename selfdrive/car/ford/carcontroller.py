@@ -21,11 +21,12 @@ class CarController:
         self.packer = CANPacker(dbc_name)
         self.CAN = fordcan.CanBus(CP)
         self.frame = 0
-
         self.apply_curvature_last = 0
         self.main_on_last = False
         self.lkas_enabled_last = False
         self.steer_alert_last = False
+        self.last_curvature = 0  # Initialize last curvature
+
 
     def update(self, CC, CS, now_nanos):
         can_sends = []
@@ -43,6 +44,18 @@ class CarController:
 
         # 计算最大安全速度
         safe_speed = calculate_safe_speed(1/current_curvature if current_curvature != 0 else 0)
+        # 曲率变化
+        curvature_change = abs(current_curvature - self.last_curvature)
+        self.last_curvature = current_curvature  # Update last curvature
+            # 根据曲率变化决定车速
+       if curvature_change > 0.1745:  # Corresponds to 10 degrees change in curvature
+           if current_speed > safe_speed:
+            target_speed = safe_speed
+           else:
+            target_speed = max(current_speed - 10, safe_speed)  # Slow down by 10 km/h
+       else:
+           target_speed = V_CRUISE_MAX
+
 
         # 如果当前速度高于安全速度，需要减速
         if current_speed > safe_speed:
@@ -54,6 +67,10 @@ class CarController:
 
         # 这里应该是发送调整速度的CAN消息的代码
         # 示例：can_sends.append(self.packer.make_some_speed_adjustment_message(target_speed))
+        ### 现有代码继续处理其它控制逻辑 ###
+
+        self.frame += 1
+        return actuators, can_sends
 
         # 更新上次的状态
         self.apply_curvature_last = current_curvature
